@@ -1,0 +1,224 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>StochProj5</title><meta name="generator" content="MATLAB 9.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-05-10"><meta name="DC.source" content="StochProj5.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">% Michael Bentivegna, Simon Yoon, Joya Debi</span>
+<span class="comment">% ECE302 Stochastic Processes Project 5: MMSE FIR</span>
+
+clear;
+clc;
+close <span class="string">all</span>;
+
+<span class="comment">% Summary of Project</span>
+
+<span class="comment">% The goal is to design a filter to estimate a signal (target process) and</span>
+<span class="comment">% achieve an MMSE estimate. Using Wiener filtering formulae, we derived</span>
+<span class="comment">% theoretical valeus for correlations to be made applicable in the simulation</span>
+<span class="comment">% of the MMSE estimation. We solve for the impulse response values via the</span>
+<span class="comment">% linear equations of FIR filter length N. We solve for these normal</span>
+<span class="comment">% equations for LMMSE.</span>
+
+
+<span class="comment">% length of filter h</span>
+N = [4 6 10];
+
+<span class="comment">% sigma^2</span>
+sigsq = 0.5;
+
+<span class="comment">% M is number of samples, process len</span>
+M = 1000;
+
+<span class="comment">% random vectors</span>
+s = 2*randi(2, [M 1]) - 3;
+d = sqrt(sigsq) * randn([M 1]);
+
+<span class="comment">% need to pad c so that convolution works at Rrr,Rsr[0] index</span>
+c = [0 0 1 .2 .4];
+r = conv(s, c, <span class="string">'same'</span>) + d;
+
+<span class="keyword">for</span> m = 1:length(N)
+
+	<span class="comment">% normal equations</span>
+
+    <span class="comment">% Rrr autocorrelation</span>
+	R_rr = zeros([N(m), 1]);
+	R_rr(1:3) = [1.2+sigsq .28 .4];
+    <span class="comment">% Rrr = xcorr(r);</span>
+
+    <span class="comment">% Rsr</span>
+	R_sr = zeros([N(m), 1]);
+	R_sr(1:3) = [1 .2 .4].';
+    <span class="comment">% Rsr = xcorr(s,r);</span>
+
+	R = R_rr(abs((1:N(m)) - (1:N(m)).') + 1);
+    <span class="comment">% Ra = Rrr(abs((1:N(m)) - (1:N(m)).') + 1);</span>
+
+	<span class="comment">% solve for h</span>
+    <span class="comment">% h = inv(R)*R_sr</span>
+	h = R \ R_sr(1:N(m));
+    <span class="comment">% hA = Ra \ Rsr(1:N(m));</span>
+
+	<span class="comment">% need to pad h so that it's correctly centered at middle</span>
+	h = [zeros([N(m)-1 1]); h];
+    <span class="comment">% hA = [zeros([N(m)-1 1]); hA];</span>
+
+	<span class="comment">% calculate estimate with our filter</span>
+	s_hat = conv(r, h, <span class="string">'same'</span>);
+    <span class="comment">% s_hatA = conv(r, hA , 'same');</span>
+
+	<span class="comment">% calculate and print mse</span>
+	mse = mean((s-s_hat).^2);
+    <span class="comment">% mseA = mean((s-s_hatA).^2);</span>
+	fprintf(<span class="string">'Theoretical: N=%d: MSE=%f\n'</span>, N(m), mse);
+    <span class="comment">% fprintf('Via xcorr: N=%d: MSE=%f\n', N(m), mseA);</span>
+<span class="keyword">end</span>
+
+<span class="comment">% The MSE is low, but not much better than random guessing at 0.5. Changing</span>
+<span class="comment">% the sigma squared significantly changes performance, but N is too small</span>
+<span class="comment">% for minute changes to be observed.</span>
+</pre><pre class="codeoutput">Theoretical: N=4: MSE=0.479391
+Theoretical: N=6: MSE=0.484165
+Theoretical: N=10: MSE=0.484344
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Michael Bentivegna, Simon Yoon, Joya Debi
+% ECE302 Stochastic Processes Project 5: MMSE FIR
+
+clear;
+clc;
+close all;
+
+% Summary of Project
+
+% The goal is to design a filter to estimate a signal (target process) and 
+% achieve an MMSE estimate. Using Wiener filtering formulae, we derived 
+% theoretical valeus for correlations to be made applicable in the simulation
+% of the MMSE estimation. We solve for the impulse response values via the
+% linear equations of FIR filter length N. We solve for these normal
+% equations for LMMSE. 
+
+
+% length of filter h 
+N = [4 6 10];
+
+% sigma^2
+sigsq = 0.5;
+
+% M is number of samples, process len
+M = 1000;
+
+% random vectors
+s = 2*randi(2, [M 1]) - 3;
+d = sqrt(sigsq) * randn([M 1]);
+
+% need to pad c so that convolution works at Rrr,Rsr[0] index
+c = [0 0 1 .2 .4];
+r = conv(s, c, 'same') + d;
+
+for m = 1:length(N)
+
+	% normal equations
+
+    % Rrr autocorrelation
+	R_rr = zeros([N(m), 1]);
+	R_rr(1:3) = [1.2+sigsq .28 .4];
+    % Rrr = xcorr(r);
+	
+    % Rsr
+	R_sr = zeros([N(m), 1]);
+	R_sr(1:3) = [1 .2 .4].';
+    % Rsr = xcorr(s,r); 
+
+	R = R_rr(abs((1:N(m)) - (1:N(m)).') + 1);
+    % Ra = Rrr(abs((1:N(m)) - (1:N(m)).') + 1);
+
+	% solve for h
+    % h = inv(R)*R_sr
+	h = R \ R_sr(1:N(m));
+    % hA = Ra \ Rsr(1:N(m));
+
+	% need to pad h so that it's correctly centered at middle
+	h = [zeros([N(m)-1 1]); h];
+    % hA = [zeros([N(m)-1 1]); hA];
+
+	% calculate estimate with our filter
+	s_hat = conv(r, h, 'same');
+    % s_hatA = conv(r, hA , 'same');
+
+	% calculate and print mse
+	mse = mean((s-s_hat).^2);
+    % mseA = mean((s-s_hatA).^2);
+	fprintf('Theoretical: N=%d: MSE=%f\n', N(m), mse);
+    % fprintf('Via xcorr: N=%d: MSE=%f\n', N(m), mseA);
+end
+
+% The MSE is low, but not much better than random guessing at 0.5. Changing
+% the sigma squared significantly changes performance, but N is too small
+% for minute changes to be observed.
+##### SOURCE END #####
+--></body></html>
